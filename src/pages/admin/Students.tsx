@@ -14,7 +14,8 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { useStudents, useCreateStudent, useUpdateStudent, useUpdateStudentStatus, useDeleteStudent, useStudentHistory, type Student } from '@/hooks/useStudents';
+import { useStudents, useCreateStudent, useUpdateStudent, useUpdateStudentStatus, useDeleteStudent, useStudentHistory, findDuplicateStudent, type Student } from '@/hooks/useStudents';
+import { toast } from 'sonner';
 import { useCourses } from '@/hooks/useCourses';
 import { useSendWhatsAppMessage, MESSAGE_TEMPLATES, replaceTemplateVariables } from '@/hooks/useEvolutionApi';
 import { formatCurrency } from '@/lib/currency';
@@ -33,6 +34,8 @@ const statusLabels: Record<string, string> = {
   concluido: 'Concluído',
   desistente: 'Desistente',
 };
+
+const today = () => new Date().toISOString().split('T')[0];
 
 const Students = () => {
   const { data: students, isLoading: studentsLoading } = useStudents();
@@ -71,6 +74,7 @@ const Students = () => {
     address: '',
     city: '',
     document_number: '',
+    enrollment_date: today(),
   });
 
   // Edit form data
@@ -84,6 +88,7 @@ const Students = () => {
     document_number: '',
     license_number: '',
     status: '',
+    enrollment_date: '',
   });
 
   const filteredStudents = students?.filter(student => {
@@ -101,7 +106,18 @@ const Students = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // Prevent duplicated students before submitting
+    const duplicate = await findDuplicateStudent({
+      email: formData.email,
+      phone: formData.phone || undefined,
+      document_number: formData.document_number || undefined,
+    });
+    if (duplicate) {
+      toast.error(duplicate, { description: 'Registo cancelado para evitar duplicados.' });
+      return;
+    }
+
     await createStudent.mutateAsync({
       full_name: formData.full_name,
       email: formData.email,
@@ -111,6 +127,7 @@ const Students = () => {
       address: formData.address || undefined,
       city: formData.city || undefined,
       document_number: formData.document_number || undefined,
+      enrollment_date: formData.enrollment_date || undefined,
     });
 
     setIsDialogOpen(false);
@@ -123,6 +140,7 @@ const Students = () => {
       address: '',
       city: '',
       document_number: '',
+      enrollment_date: today(),
     });
   };
 
@@ -147,6 +165,7 @@ const Students = () => {
       document_number: student.document_number || '',
       license_number: student.license_number || '',
       status: student.status,
+      enrollment_date: student.enrollment_date ? student.enrollment_date.split('T')[0] : '',
     });
     setIsEditDialogOpen(true);
   };
@@ -164,6 +183,7 @@ const Students = () => {
       document_number: editFormData.document_number || null,
       license_number: editFormData.license_number || null,
       status: editFormData.status,
+      enrollment_date: editFormData.enrollment_date || undefined,
       profileUpdate: {
         full_name: editFormData.full_name,
         phone: editFormData.phone || undefined,
@@ -346,6 +366,21 @@ const Students = () => {
                         value={formData.city}
                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       />
+                    </div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="enrollment_date">Data de Inscrição *</Label>
+                      <Input
+                        id="enrollment_date"
+                        type="date"
+                        value={formData.enrollment_date}
+                        onChange={(e) => setFormData({ ...formData, enrollment_date: e.target.value })}
+                        required
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Data real da inscrição (pode ser diferente da data de hoje).
+                      </p>
                     </div>
                   </div>
                   <DialogFooter>
@@ -727,6 +762,17 @@ const Students = () => {
                     onChange={(e) => setEditFormData({ ...editFormData, birth_date: e.target.value })}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_enrollment_date">Data de Inscrição</Label>
+                  <Input
+                    id="edit_enrollment_date"
+                    type="date"
+                    value={editFormData.enrollment_date}
+                    onChange={(e) => setEditFormData({ ...editFormData, enrollment_date: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit_course">Curso</Label>
                   <Select 

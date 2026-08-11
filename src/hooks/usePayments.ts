@@ -195,7 +195,7 @@ export const useUpdatePayment = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...payment }: Partial<Payment> & { id: string }) => {
+    mutationFn: async ({ id, student_name: _student_name, ...payment }: Partial<Payment> & { id: string }) => {
       // Auto-fill payment_date when status changes to 'paid' and no date provided
       const paymentData = { ...payment };
       if (payment.status === 'paid' && !payment.payment_date) {
