@@ -12,6 +12,10 @@ import { DateRangeFilter, getDefaultDateRange, type DateRange } from '@/componen
 import { exportPaymentsToPDF } from '@/lib/exportPdf';
 import { usePayments } from '@/hooks/usePayments';
 
+// Local (not UTC) YYYY-MM-DD so "hoje" isn't shifted by timezone
+const toDayString = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 const Dashboard = () => {
   const [dateRange, setDateRange] = useState<DateRange>(getDefaultDateRange());
   const { data: dashboardStats, isLoading: statsLoading } = useDashboardStats({
