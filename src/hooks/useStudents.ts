@@ -116,22 +116,25 @@ export const useStudents = () => {
 
       if (studentsError) throw studentsError;
 
-      const userIds = students.map(s => s.user_id);
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, email, phone')
-        .in('user_id', userIds);
+      const userIds = [...new Set(students.map(s => s.user_id))];
+      const courseIds = [...new Set(students.map(s => s.course_id).filter(Boolean))] as string[];
 
-      const courseIds = students.map(s => s.course_id).filter(Boolean) as string[];
-      const { data: courses } = await supabase
-        .from('courses')
-        .select('id, name, category')
-        .in('id', courseIds);
+      // Run both lookups in parallel instead of waiting one after the other
+      const [{ data: profiles }, { data: courses }] = await Promise.all([
+        supabase.from('profiles').select('user_id, full_name, email, phone').in('user_id', userIds),
+        courseIds.length
+          ? supabase.from('courses').select('id, name, category').in('id', courseIds)
+          : Promise.resolve({ data: [] as { id: string; name: string; category: string }[] }),
+      ]);
+
+      // O(1) lookups instead of a full scan per student
+      const profileMap = new Map((profiles ?? []).map(p => [p.user_id, p]));
+      const courseMap = new Map((courses ?? []).map(c => [c.id, c]));
 
       const result = students.map(student => ({
         ...student,
-        profile: profiles?.find(p => p.user_id === student.user_id) || null,
-        course: courses?.find(c => c.id === student.course_id) || null,
+        profile: profileMap.get(student.user_id) || null,
+        course: student.course_id ? courseMap.get(student.course_id) || null : null,
       }));
 
       return result as Student[];
