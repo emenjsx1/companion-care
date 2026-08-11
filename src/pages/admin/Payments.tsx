@@ -425,7 +425,15 @@ const Payments = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Histórico de Pagamentos</CardTitle>
-                <CardDescription>{filteredPayments.length} pagamento(s)</CardDescription>
+                <CardDescription className="flex flex-wrap items-center gap-2">
+                  <span>{filteredPayments.length} pagamento(s)</span>
+                  {filteredPayments.some(isIncompletePayment) && (
+                    <span className="inline-flex items-center gap-1 text-destructive">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      {filteredPayments.filter(isIncompletePayment).length} por completar (a vermelho)
+                    </span>
+                  )}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {paymentsLoading ? (
@@ -454,23 +462,33 @@ const Payments = () => {
                             </TableCell>
                           </TableRow>
                         ) : filteredPayments.map((payment) => {
+                          const incomplete = isIncompletePayment(payment);
                           return (
-                            <TableRow key={payment.id}>
-                              <TableCell className="font-medium">
-                                {payment.student_name}
+                            <TableRow
+                              key={payment.id}
+                              className={incomplete ? 'bg-destructive/5 hover:bg-destructive/10 border-l-4 border-l-destructive' : undefined}
+                            >
+                              <TableCell className={incomplete ? 'font-medium text-destructive' : 'font-medium'}>
+                                <span className="inline-flex items-center gap-2">
+                                  {incomplete && <AlertCircle className="h-4 w-4 shrink-0" />}
+                                  {payment.student_name}
+                                </span>
                               </TableCell>
-                              <TableCell className="font-semibold">
-                                {formatCurrency(Number(payment.amount))}
+                              <TableCell className={incomplete ? 'font-semibold text-destructive' : 'font-semibold'}>
+                                {Number(payment.amount) > 0 ? formatCurrency(Number(payment.amount)) : 'Por preencher'}
                               </TableCell>
-                              <TableCell className="hidden sm:table-cell text-muted-foreground">
-                                {payment.payment_date ? new Date(payment.payment_date).toLocaleDateString('pt-MZ') : '-'}
+                              <TableCell className={`hidden sm:table-cell ${!payment.payment_date ? 'text-destructive' : 'text-muted-foreground'}`}>
+                                {payment.payment_date ? new Date(payment.payment_date).toLocaleDateString('pt-MZ') : 'Sem data'}
                               </TableCell>
                               <TableCell className="hidden md:table-cell">
                                 {PAYMENT_METHODS.find(m => m.value === payment.payment_method)?.label || payment.payment_method || '-'}
                               </TableCell>
                               <TableCell>
-                                <Badge variant="outline" className={statusColors[payment.status]}>
-                                  {statusLabels[payment.status]}
+                                <Badge
+                                  variant="outline"
+                                  className={incomplete ? 'bg-destructive/10 text-destructive border-destructive/30' : statusColors[payment.status]}
+                                >
+                                  {incomplete ? 'Por completar' : statusLabels[payment.status]}
                                 </Badge>
                               </TableCell>
                               <TableCell className="hidden lg:table-cell text-muted-foreground">
