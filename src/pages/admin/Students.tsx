@@ -763,6 +763,17 @@ const Students = () => {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="edit_enrollment_date">Data de Inscrição</Label>
+                  <Input
+                    id="edit_enrollment_date"
+                    type="date"
+                    value={editFormData.enrollment_date}
+                    onChange={(e) => setEditFormData({ ...editFormData, enrollment_date: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <Label htmlFor="edit_course">Curso</Label>
                   <Select 
                     value={editFormData.course_id}
