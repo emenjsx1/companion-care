@@ -160,7 +160,7 @@ serve(async (req) => {
         };
 
         // Get webhook URL from Supabase
-        const supabaseUrl = Deno.env.get("SUPABASE_URL") || "https://xzvafzivobwdknvivxwi.supabase.co";
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
         const webhookUrl = `${supabaseUrl}/functions/v1/whatsapp-webhook`;
 
         // Body format - Evolution API v2 requires "integration" field
