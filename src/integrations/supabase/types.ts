@@ -357,12 +357,15 @@ export type Database = {
       students: {
         Row: {
           address: string | null
+          agreed_fee: number | null
           birth_date: string | null
           branch: string | null
           city: string | null
           course_id: string | null
           created_at: string
+          discount: number
           document_number: string | null
+          due_day: number | null
           enrollment_date: string
           id: string
           license_number: string | null
@@ -372,12 +375,15 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          agreed_fee?: number | null
           birth_date?: string | null
           branch?: string | null
           city?: string | null
           course_id?: string | null
           created_at?: string
+          discount?: number
           document_number?: string | null
+          due_day?: number | null
           enrollment_date?: string
           id?: string
           license_number?: string | null
@@ -387,12 +393,15 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          agreed_fee?: number | null
           birth_date?: string | null
           branch?: string | null
           city?: string | null
           course_id?: string | null
           created_at?: string
+          discount?: number
           document_number?: string | null
+          due_day?: number | null
           enrollment_date?: string
           id?: string
           license_number?: string | null
