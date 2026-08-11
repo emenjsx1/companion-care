@@ -17,12 +17,15 @@ export interface MonthlyData {
   revenue: number;
 }
 
-export const useDashboardStats = () => {
+export const useDashboardStats = (range?: { startDate: Date; endDate: Date }) => {
+  const startISO = range ? range.startDate.toISOString() : undefined;
+  const endISO = range ? range.endDate.toISOString() : undefined;
   return useQuery({
-    queryKey: ['dashboard-stats'],
+    queryKey: ['dashboard-stats', startISO, endISO],
     queryFn: async (): Promise<DashboardStats> => {
       const now = new Date();
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const periodStart = range ? range.startDate : new Date(now.getFullYear(), now.getMonth(), 1);
+      const periodEnd = range ? range.endDate : now;
       
       // All independent reads run in parallel
       const [
@@ -34,24 +37,27 @@ export const useDashboardStats = () => {
         { count: pendingExams },
       ] = await Promise.all([
         supabase.from('students').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-        supabase.from('students').select('*', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth),
+        supabase
+          .from('students')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', periodStart.toISOString())
+          .lte('created_at', periodEnd.toISOString()),
         supabase.from('students').select('id, course_id'),
         supabase.from('courses').select('id, price'),
         supabase.from('payments').select('student_id, amount, status, payment_date, updated_at').eq('status', 'paid'),
         supabase.from('exams').select('*', { count: 'exact', head: true }).eq('status', 'scheduled'),
       ]);
 
-      // Filter payments by month in-memory (payment_date can be NULL)
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
-
+      // Filter payments by the selected period in-memory (payment_date can be NULL)
       const paidPayments = payments || [];
-      
+      const startMs = periodStart.getTime();
+      const endMs = periodEnd.getTime();
+
       const monthlyRevenue = paidPayments.filter(p => {
         const payDate = p.payment_date || p.updated_at?.split('T')[0];
         if (!payDate) return false;
-        const date = new Date(payDate);
-        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+        const ms = new Date(`${payDate.split('T')[0]}T12:00:00`).getTime();
+        return ms >= startMs && ms <= endMs;
       }).reduce((sum, p) => sum + Number(p.amount), 0);
 
       // Calculate pending amount as: sum of (coursePrice - totalPaid) for each student
