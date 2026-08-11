@@ -59,20 +59,21 @@ export const usePayments = (filters?: { startDate?: string; endDate?: string; st
       if (paymentsError) throw paymentsError;
 
       const studentIds = [...new Set(payments.map(p => p.student_id))];
-      const { data: students } = await supabase
-        .from('students')
-        .select('id, user_id')
-        .in('id', studentIds);
+      const { data: students } = studentIds.length
+        ? await supabase.from('students').select('id, user_id').in('id', studentIds)
+        : { data: [] as { id: string; user_id: string }[] };
 
-      const userIds = students?.map(s => s.user_id) || [];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name')
-        .in('user_id', userIds);
+      const userIds = [...new Set((students ?? []).map(s => s.user_id))];
+      const { data: profiles } = userIds.length
+        ? await supabase.from('profiles').select('user_id, full_name').in('user_id', userIds)
+        : { data: [] as { user_id: string; full_name: string }[] };
+
+      const studentMap = new Map((students ?? []).map(s => [s.id, s]));
+      const profileMap = new Map((profiles ?? []).map(p => [p.user_id, p]));
 
       const result = payments.map(payment => {
-        const student = students?.find(s => s.id === payment.student_id);
-        const profile = profiles?.find(p => p.user_id === student?.user_id);
+        const student = studentMap.get(payment.student_id);
+        const profile = student ? profileMap.get(student.user_id) : undefined;
         return {
           ...payment,
           student_name: profile?.full_name || 'Desconhecido',
