@@ -274,7 +274,7 @@ const Receivables = () => {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground flex items-center gap-2"><TrendingUp className="h-4 w-4" />Recebido no período</p><p className="text-2xl font-bold text-success">{formatCurrency(report?.totalPaid ?? 0)}</p></CardContent></Card>
-              <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Pendente no período</p><p className="text-2xl font-bold text-warning">{formatCurrency(report?.totalPending ?? 0)}</p></CardContent></Card>
+              <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Pendente registado (período)</p><p className="text-2xl font-bold text-warning">{formatCurrency(report?.totalPending ?? 0)}</p></CardContent></Card>
               <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Pagamentos</p><p className="text-2xl font-bold">{report?.paymentCount ?? 0}</p></CardContent></Card>
               <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Novos alunos</p><p className="text-2xl font-bold">{report?.newStudents ?? 0}</p></CardContent></Card>
             </div>

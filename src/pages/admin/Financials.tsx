@@ -269,7 +269,7 @@ const Financials = () => {
                     <CreditCard className="h-6 w-6 text-warning" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Pendente</p>
+                    <p className="text-sm text-muted-foreground">Em dívida (saldo)</p>
                     <p className="text-2xl font-bold text-warning">{formatCurrency(summary?.totalPending || 0)}</p>
                   </div>
                 </div>
@@ -283,7 +283,7 @@ const Financials = () => {
                     <CreditCard className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Somatório Total</p>
+                    <p className="text-sm text-muted-foreground">Valor total dos cursos</p>
                     <p className="text-2xl font-bold text-primary">
                       {formatCurrency((summary?.totalRevenue || 0) + (summary?.totalPending || 0))}
                     </p>

@@ -75,29 +75,9 @@ const Payments = () => {
 
   const totalPaid = payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount), 0) || 0;
   
-  // Calculate real pending: sum of all course prices - sum of all paid payments
-  const calculateRealPending = () => {
-    if (!students || !payments || !courses) return 0;
-    
-    let totalCourseValue = 0;
-    let totalPaidAmount = 0;
-    
-    students.forEach(student => {
-      // Find course price from courses data
-      const course = courses.find(c => c.id === student.course_id);
-      const coursePrice = course?.price || 0;
-      totalCourseValue += Number(coursePrice);
-      
-      // Sum paid payments for this student
-      const studentPayments = payments.filter(p => p.student_id === student.id && p.status === 'paid');
-      const paidAmount = studentPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      totalPaidAmount += paidAmount;
-    });
-    
-    return Math.max(0, totalCourseValue - totalPaidAmount);
-  };
-  
-  const totalPending = calculateRealPending();
+  // "Pendente" nesta página = soma dos registos de pagamento com estado pendente.
+  // A dívida real do aluno (curso - pago) está na secção Conta-Corrente.
+  const totalPending = payments?.filter(p => p.status === 'pending').reduce((sum, p) => sum + Number(p.amount), 0) || 0;
 
   // When student is selected, update the form
   useEffect(() => {
@@ -364,7 +344,7 @@ const Payments = () => {
                   <AlertCircle className="h-5 w-5 text-warning" />
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">Pendente</div>
+                  <div className="text-sm text-muted-foreground">Pendente (registos)</div>
                   <div className="text-2xl font-bold text-warning">{formatCurrency(totalPending)}</div>
                 </div>
               </div>
@@ -548,7 +528,7 @@ const Payments = () => {
                         </p>
                       </div>
                       <div className="p-4 bg-warning/10 rounded-lg">
-                        <p className="text-sm text-muted-foreground">Total Pendente</p>
+                        <p className="text-sm text-muted-foreground">Total Pendente (registos)</p>
                         <p className="text-2xl font-bold text-warning">
                           {formatCurrency(report?.totalPending || 0)}
                         </p>

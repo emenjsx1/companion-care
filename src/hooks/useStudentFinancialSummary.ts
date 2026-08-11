@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { computeTotalDue } from '@/lib/ledger';
 
 export interface StudentFinancialSummary {
   studentId: string;
@@ -24,7 +25,7 @@ export const useStudentFinancialSummary = (studentId: string | null) => {
       // Get student with course and profile
       const { data: student, error: studentError } = await supabase
         .from('students')
-        .select('id, user_id, course_id')
+        .select('id, user_id, course_id, agreed_fee, discount')
         .eq('id', studentId)
         .single();
 
@@ -61,14 +62,15 @@ export const useStudentFinancialSummary = (studentId: string | null) => {
 
       const totalPaid = payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount), 0) || 0;
       const totalPending = payments?.filter(p => p.status === 'pending').reduce((sum, p) => sum + Number(p.amount), 0) || 0;
-      const remainingBalance = Math.max(0, coursePrice - totalPaid);
+      const totalDue = computeTotalDue(student.agreed_fee, coursePrice, student.discount);
+      const remainingBalance = Math.max(0, totalDue - totalPaid);
 
       return {
         studentId,
         studentName: profile?.full_name || 'Desconhecido',
         courseId: student.course_id,
         courseName,
-        coursePrice,
+        coursePrice: totalDue,
         totalPaid,
         totalPending,
         remainingBalance,
@@ -88,7 +90,7 @@ export const useAllStudentsFinancialSummary = () => {
       // Get all students
       const { data: students, error: studentsError } = await supabase
         .from('students')
-        .select('id, user_id, course_id');
+        .select('id, user_id, course_id, agreed_fee, discount');
 
       if (studentsError || !students) return [];
 
@@ -122,14 +124,15 @@ export const useAllStudentsFinancialSummary = () => {
         const coursePrice = course ? Number(course.price) : 0;
         const totalPaid = payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount), 0);
         const totalPending = payments.filter(p => p.status === 'pending').reduce((sum, p) => sum + Number(p.amount), 0);
-        const remainingBalance = Math.max(0, coursePrice - totalPaid);
+        const totalDue = computeTotalDue(student.agreed_fee, coursePrice, student.discount);
+        const remainingBalance = Math.max(0, totalDue - totalPaid);
 
         return {
           studentId: student.id,
           studentName: profile?.full_name || 'Desconhecido',
           courseId: student.course_id,
           courseName: course?.name || null,
-          coursePrice,
+          coursePrice: totalDue,
           totalPaid,
           totalPending,
           remainingBalance,
