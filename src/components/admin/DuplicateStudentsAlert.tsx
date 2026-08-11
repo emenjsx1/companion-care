@@ -43,8 +43,6 @@ export const findDuplicateGroups = (students: Student[]): DuplicateGroup[] => {
   };
 
   build(s => norm(s.document_number), 'Mesmo nº de documento (BI)');
-  build(s => norm(s.profile?.email), 'Mesmo email');
-  build(s => norm(s.profile?.phone), 'Mesmo telefone');
   build(s => norm(s.profile?.full_name), 'Mesmo nome');
 
   return groups;

@@ -66,18 +66,8 @@ export const findDuplicateStudent = async (student: {
   document_number?: string;
   full_name?: string;
 }): Promise<string | null> => {
-  const email = student.email?.trim().toLowerCase();
-  if (email) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('user_id, email')
-      .ilike('email', email)
-      .limit(1);
-    if (data && data.length > 0) {
-      return `Já existe um aluno registado com o email ${student.email}.`;
-    }
-  }
-
+  // Only the document (BI) and the full name are treated as duplicates.
+  // Email/phone can legitimately be shared (family, same contact).
   const doc = student.document_number?.trim();
   if (doc) {
     const { data } = await supabase
@@ -90,15 +80,15 @@ export const findDuplicateStudent = async (student: {
     }
   }
 
-  const phone = student.phone?.trim();
-  if (phone) {
+  const name = student.full_name?.trim();
+  if (name) {
     const { data } = await supabase
       .from('profiles')
       .select('user_id')
-      .eq('phone', phone)
+      .ilike('full_name', name)
       .limit(1);
     if (data && data.length > 0) {
-      return `Já existe um aluno registado com o telefone ${phone}.`;
+      return `Já existe um aluno registado com o nome ${name}.`;
     }
   }
 
