@@ -20,6 +20,7 @@ import { useCourses } from '@/hooks/useCourses';
 import { useSendWhatsAppMessage, MESSAGE_TEMPLATES, replaceTemplateVariables } from '@/hooks/useEvolutionApi';
 import { formatCurrency } from '@/lib/currency';
 import { exportStudentsToPDF } from '@/lib/exportPdf';
+import { DuplicateStudentsAlert } from '@/components/admin/DuplicateStudentsAlert';
 
 const statusColors: Record<string, string> = {
   active: 'bg-success/10 text-success border-success/20',
