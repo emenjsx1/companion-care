@@ -56,7 +56,54 @@ export interface StudentInsert {
   address?: string;
   city?: string;
   document_number?: string;
+  enrollment_date?: string;
 }
+
+// Checks whether a student already exists (email, BI/document or phone)
+export const findDuplicateStudent = async (student: {
+  email: string;
+  phone?: string;
+  document_number?: string;
+  full_name?: string;
+}): Promise<string | null> => {
+  const email = student.email?.trim().toLowerCase();
+  if (email) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('user_id, email')
+      .ilike('email', email)
+      .limit(1);
+    if (data && data.length > 0) {
+      return `Já existe um aluno registado com o email ${student.email}.`;
+    }
+  }
+
+  const doc = student.document_number?.trim();
+  if (doc) {
+    const { data } = await supabase
+      .from('students')
+      .select('id')
+      .ilike('document_number', doc)
+      .limit(1);
+    if (data && data.length > 0) {
+      return `Já existe um aluno registado com o documento (BI) ${doc}.`;
+    }
+  }
+
+  const phone = student.phone?.trim();
+  if (phone) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .eq('phone', phone)
+      .limit(1);
+    if (data && data.length > 0) {
+      return `Já existe um aluno registado com o telefone ${phone}.`;
+    }
+  }
+
+  return null;
+};
 
 export const useStudents = () => {
   return useQuery({
@@ -152,6 +199,12 @@ export const useCreateStudent = () => {
 
   return useMutation({
     mutationFn: async (student: StudentInsert) => {
+      // Block duplicated students before creating anything
+      const duplicate = await findDuplicateStudent(student);
+      if (duplicate) {
+        throw new Error(`${duplicate} Verifique a lista de alunos antes de registar novamente.`);
+      }
+
       // Generate a UUID for user_id without creating an auth account
       // This makes students pure CRM records without login capability
       const userId = crypto.randomUUID();
@@ -179,6 +232,7 @@ export const useCreateStudent = () => {
           address: student.address || null,
           city: student.city || null,
           document_number: student.document_number || null,
+          ...(student.enrollment_date ? { enrollment_date: student.enrollment_date } : {}),
           status: 'active',
         })
         .select()
@@ -221,6 +275,7 @@ export const useUpdateStudent = () => {
           status: student.status,
           license_number: student.license_number,
           document_number: student.document_number,
+          ...(student.enrollment_date ? { enrollment_date: student.enrollment_date } : {}),
         })
         .eq('id', id)
         .select()
