@@ -1,3 +1,5 @@
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,21 +8,38 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
-import Styleguide from "./pages/Styleguide";
 import Login from "./pages/admin/Login";
-import Dashboard from "./pages/admin/Dashboard";
-import Students from "./pages/admin/Students";
-import Payments from "./pages/admin/Payments";
-import Financials from "./pages/admin/Financials";
-import Courses from "./pages/admin/Courses";
-import Exams from "./pages/admin/Exams";
-import Communication from "./pages/admin/Communication";
-import Settings from "./pages/admin/Settings";
-import UserManagement from "./pages/admin/UserManagement";
-import Gallery from "./pages/admin/Gallery";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const Styleguide = lazy(() => import("./pages/Styleguide"));
+const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
+const Students = lazy(() => import("./pages/admin/Students"));
+const Payments = lazy(() => import("./pages/admin/Payments"));
+const Financials = lazy(() => import("./pages/admin/Financials"));
+const Courses = lazy(() => import("./pages/admin/Courses"));
+const Exams = lazy(() => import("./pages/admin/Exams"));
+const Communication = lazy(() => import("./pages/admin/Communication"));
+const Settings = lazy(() => import("./pages/admin/Settings"));
+const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
+const Gallery = lazy(() => import("./pages/admin/Gallery"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      retry: 1,
+    },
+  },
+});
+
+const PageFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,6 +48,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <Suspense fallback={<PageFallback />}>
           <Routes>
             {/* Public Pages */}
             <Route path="/" element={<LandingPage />} />
@@ -90,6 +110,7 @@ const App = () => (
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
