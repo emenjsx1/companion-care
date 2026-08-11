@@ -34,6 +34,12 @@ const statusLabels: Record<string, string> = {
   refunded: 'Reembolsado',
 };
 
+const today = () => new Date().toISOString().split('T')[0];
+
+// A payment record is "incomplete" when the money was not (fully) registered yet
+const isIncompletePayment = (p: { status: string; amount: number | string; payment_date: string | null }) =>
+  p.status === 'pending' || Number(p.amount) <= 0 || !p.payment_date;
+
 const Payments = () => {
   const [dateFilter, setDateFilter] = useState<{ startDate?: string; endDate?: string }>({});
   const { data: payments, isLoading: paymentsLoading } = usePayments(dateFilter);
@@ -52,7 +58,7 @@ const Payments = () => {
   const [formData, setFormData] = useState({
     student_id: '',
     amount: '',
-    payment_date: '',
+    payment_date: today(),
     payment_method: '',
     status: 'pending' as 'pending' | 'paid',
     description: '',
@@ -135,7 +141,7 @@ const Payments = () => {
     setFormData({
       student_id: '',
       amount: '',
-      payment_date: '',
+      payment_date: today(),
       payment_method: '',
       status: 'pending',
       description: '',
@@ -257,13 +263,16 @@ const Payments = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="payment_date">Data do Pagamento</Label>
+                      <Label htmlFor="payment_date">Data do Pagamento *</Label>
                       <Input 
                         id="payment_date" 
                         type="date" 
                         value={formData.payment_date}
                         onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Data real do pagamento — altere se o lançamento for feito noutro dia.
+                      </p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
