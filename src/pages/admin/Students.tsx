@@ -442,6 +442,8 @@ const Students = () => {
         </Card>
 
         {/* Students Table */}
+        {students && students.length > 0 && <DuplicateStudentsAlert students={students} />}
+
         <Card>
           <CardHeader>
             <CardTitle>Lista de Alunos</CardTitle>
