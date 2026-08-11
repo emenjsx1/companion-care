@@ -248,7 +248,7 @@ export const useUpdateExam = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...exam }: Partial<Exam> & { id: string }) => {
+    mutationFn: async ({ id, student_name: _student_name, ...exam }: Partial<Exam> & { id: string }) => {
       const { data, error } = await supabase
         .from('exams')
         .update(exam)
