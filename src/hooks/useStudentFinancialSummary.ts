@@ -90,7 +90,7 @@ export const useAllStudentsFinancialSummary = () => {
       // Get all students
       const { data: students, error: studentsError } = await supabase
         .from('students')
-        .select('id, user_id, course_id');
+        .select('id, user_id, course_id, agreed_fee, discount');
 
       if (studentsError || !students) return [];
 
@@ -125,14 +125,14 @@ export const useAllStudentsFinancialSummary = () => {
         const totalPaid = payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount), 0);
         const totalPending = payments.filter(p => p.status === 'pending').reduce((sum, p) => sum + Number(p.amount), 0);
         const totalDue = computeTotalDue(student.agreed_fee, coursePrice, student.discount);
-      const remainingBalance = Math.max(0, totalDue - totalPaid);
+        const remainingBalance = Math.max(0, totalDue - totalPaid);
 
         return {
           studentId: student.id,
           studentName: profile?.full_name || 'Desconhecido',
           courseId: student.course_id,
           courseName: course?.name || null,
-          coursePrice,
+          coursePrice: totalDue,
           totalPaid,
           totalPending,
           remainingBalance,
