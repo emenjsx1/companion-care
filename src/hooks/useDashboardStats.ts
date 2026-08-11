@@ -24,39 +24,28 @@ export const useDashboardStats = () => {
       const now = new Date();
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
       
-      // Count active students
-      const { count: activeCount } = await supabase
-        .from('students')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'active');
-
-      // Count students this month
-      const { count: monthCount } = await supabase
-        .from('students')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', firstDayOfMonth);
-
-      // Get students with courses to calculate real pending values
-      const { data: students } = await supabase
-        .from('students')
-        .select('id, course_id');
-      
-      const courseIds = [...new Set(students?.map(s => s.course_id).filter(Boolean))] as string[];
-      const { data: courses } = await supabase
-        .from('courses')
-        .select('id, price')
-        .in('id', courseIds.length > 0 ? courseIds : ['no-match']);
-
-      // Sum monthly revenue - use updated_at as fallback when payment_date is NULL
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('student_id, amount, status, payment_date, updated_at');
+      // All independent reads run in parallel
+      const [
+        { count: activeCount },
+        { count: monthCount },
+        { data: students },
+        { data: courses },
+        { data: payments },
+        { count: pendingExams },
+      ] = await Promise.all([
+        supabase.from('students').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+        supabase.from('students').select('*', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth),
+        supabase.from('students').select('id, course_id'),
+        supabase.from('courses').select('id, price'),
+        supabase.from('payments').select('student_id, amount, status, payment_date, updated_at').eq('status', 'paid'),
+        supabase.from('exams').select('*', { count: 'exact', head: true }).eq('status', 'scheduled'),
+      ]);
 
       // Filter payments by month in-memory (payment_date can be NULL)
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
-      
-      const paidPayments = payments?.filter(p => p.status === 'paid') || [];
+
+      const paidPayments = payments || [];
       
       const monthlyRevenue = paidPayments.filter(p => {
         const payDate = p.payment_date || p.updated_at?.split('T')[0];
@@ -65,23 +54,21 @@ export const useDashboardStats = () => {
         return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
       }).reduce((sum, p) => sum + Number(p.amount), 0);
 
-      // Count pending exams
-      const { count: pendingExams } = await supabase
-        .from('exams')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'scheduled');
-
       // Calculate pending amount as: sum of (coursePrice - totalPaid) for each student
       let pendingAmount = 0;
       let studentsWithDebt = 0;
-      
+
+      // Pre-index to avoid O(students x payments) scanning
+      const priceMap = new Map((courses ?? []).map(c => [c.id, Number(c.price)]));
+      const paidByStudent = new Map<string, number>();
+      for (const p of paidPayments) {
+        paidByStudent.set(p.student_id, (paidByStudent.get(p.student_id) || 0) + Number(p.amount));
+      }
+
       for (const student of students || []) {
-        const course = courses?.find(c => c.id === student.course_id);
-        const coursePrice = course ? Number(course.price) : 0;
-        
-        const studentPaidPayments = paidPayments.filter(p => p.student_id === student.id);
-        const totalPaid = studentPaidPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-        
+        const coursePrice = student.course_id ? priceMap.get(student.course_id) || 0 : 0;
+        const totalPaid = paidByStudent.get(student.id) || 0;
+
         // Calculate remaining balance
         const remaining = Math.max(0, coursePrice - totalPaid);
         
@@ -110,17 +97,10 @@ export const useMonthlyChartData = () => {
       const now = new Date();
       const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
-      // Get students created in last 12 months
-      const { data: students } = await supabase
-        .from('students')
-        .select('created_at')
-        .gte('created_at', twelveMonthsAgo.toISOString());
-
-      // Get paid payments - fetch all and filter in memory since payment_date can be NULL
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('amount, payment_date, updated_at')
-        .eq('status', 'paid');
+      const [{ data: students }, { data: payments }] = await Promise.all([
+        supabase.from('students').select('created_at').gte('created_at', twelveMonthsAgo.toISOString()),
+        supabase.from('payments').select('amount, payment_date, updated_at').eq('status', 'paid'),
+      ]);
 
       // Generate last 12 months
       const months: MonthlyData[] = [];
@@ -187,10 +167,9 @@ export const useRecentAlerts = () => {
 
       // Fetch profiles
       const userIds = students?.map(s => s.user_id) || [];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name')
-        .in('user_id', userIds);
+      const { data: profiles } = userIds.length
+        ? await supabase.from('profiles').select('user_id, full_name').in('user_id', userIds)
+        : { data: [] as { user_id: string; full_name: string }[] };
 
       const getStudentName = (studentId: string) => {
         const student = students?.find(s => s.id === studentId);

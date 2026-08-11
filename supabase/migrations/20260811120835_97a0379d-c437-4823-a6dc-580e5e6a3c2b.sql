@@ -1,0 +1,12 @@
+CREATE INDEX IF NOT EXISTS idx_payments_student_id ON public.payments(student_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON public.payments(status);
+CREATE INDEX IF NOT EXISTS idx_payments_payment_date ON public.payments(payment_date);
+CREATE INDEX IF NOT EXISTS idx_payments_created_at ON public.payments(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_exams_student_id ON public.exams(student_id);
+CREATE INDEX IF NOT EXISTS idx_exams_status ON public.exams(status);
+CREATE INDEX IF NOT EXISTS idx_exams_exam_date ON public.exams(exam_date);
+CREATE INDEX IF NOT EXISTS idx_students_status ON public.students(status);
+CREATE INDEX IF NOT EXISTS idx_students_course_id ON public.students(course_id);
+CREATE INDEX IF NOT EXISTS idx_students_created_at ON public.students(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON public.user_roles(user_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_email_lower ON public.profiles(lower(email));
