@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design System - Tema Vermelho (Inspirado CRIS Brand) */
+
+@layer base {
+  :root {
+    /* === CORES PRIMÁRIAS (Vermelho) === */
+    --primary: 0 72% 51%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* === CORES SECUNDÁRIAS (Charcoal/Cinza escuro) === */
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+    
+    /* === ACCENT (Vermelho claro/coral) === */
+    --accent: 0 72% 60%;
+    --accent-foreground: 0 0% 100%;
+    
+    /* === BACKGROUND & SURFACES === */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 15%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 15%;
+    
+    /* === MUTED === */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    
+    /* === BORDERS & INPUTS === */
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 72% 51%;
+    
+    /* === SEMANTIC COLORS === */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 15%;
+    
+    --info: 210 100% 50%;
+    --info-foreground: 0 0% 100%;
+    
+    /* === BORDER RADIUS === */
+    --radius: 0.5rem;
+    
+    /* === SIDEBAR (Vermelho escuro) === */
+    --sidebar-background: 0 72% 45%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 72% 45%;
+    --sidebar-accent: 0 72% 55%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 72% 40%;
+    --sidebar-ring: 0 0% 100%;
+    
+    /* === CHART COLORS === */
+    --chart-1: 0 72% 51%;
+    --chart-2: 0 0% 30%;
+    --chart-3: 0 72% 70%;
+    --chart-4: 0 0% 50%;
+    --chart-5: 0 50% 40%;
+  }
+
+  .dark {
+    --primary: 0 72% 60%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 0 0% 25%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --accent: 0 72% 55%;
+    --accent-foreground: 0 0% 100%;
+    
+    --background: 0 0% 10%;
+    --foreground: 0 0% 98%;
+    
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 98%;
+    
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 65%;
+    
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 72% 55%;
+    
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --success: 142 71% 40%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 45 93% 40%;
+    --warning-foreground: 0 0% 100%;
+    
+    --sidebar-background: 0 72% 35%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 72% 35%;
+    --sidebar-accent: 0 72% 45%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 72% 30%;
+    --sidebar-ring: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Metropolis', 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .container-section {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary to-accent;
+  }
+
+  .gradient-dark {
+    @apply bg-gradient-to-br from-secondary to-secondary/80;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+}

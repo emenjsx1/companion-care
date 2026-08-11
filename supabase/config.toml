@@ -1,0 +1,22 @@
+project_id = "xzvafzivobwdknvivxwi"
+
+[functions.is-admin]
+verify_jwt = false
+
+[functions.send-whatsapp]
+verify_jwt = false
+
+[functions.send-whatsapp-bulk]
+verify_jwt = false
+
+[functions.evolution-instance]
+verify_jwt = false
+
+[functions.daily-report]
+verify_jwt = false
+
+[functions.get-user-emails]
+verify_jwt = false
+
+[functions.whatsapp-webhook]
+verify_jwt = false
