@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { computeTotalDue } from '@/lib/ledger';
 
 export interface FinancialSummary {
   totalRevenue: number;
@@ -36,7 +37,7 @@ export const useFinancialSummary = (filters?: { startDate?: string; endDate?: st
       // Get students with courses to calculate real values
       const { data: students } = await supabase
         .from('students')
-        .select('id, course_id');
+        .select('id, course_id, agreed_fee, discount');
       
       const courseIds = [...new Set(students?.map(s => s.course_id).filter(Boolean))] as string[];
       const { data: courses } = await supabase
@@ -65,7 +66,8 @@ export const useFinancialSummary = (filters?: { startDate?: string; endDate?: st
         totalRevenue += totalPaid;
         
         // Calculate remaining balance
-        const remaining = Math.max(0, coursePrice - totalPaid);
+        const totalDue = computeTotalDue(student.agreed_fee, coursePrice, student.discount);
+        const remaining = Math.max(0, totalDue - totalPaid);
         
         if (remaining > 0) {
           totalPending += remaining;
@@ -94,7 +96,7 @@ export const useStudentsWithDebt = () => {
       // Fetch all students
       const { data: students } = await supabase
         .from('students')
-        .select('id, user_id, course_id');
+        .select('id, user_id, course_id, agreed_fee, discount');
 
       if (!students || students.length === 0) return [];
 
@@ -131,8 +133,8 @@ export const useStudentsWithDebt = () => {
 
         const coursePrice = course ? Number(course.price) : 0;
         
-        // FIXED: totalDebt = coursePrice - totalPaid (remaining balance)
-        const totalDebt = Math.max(0, coursePrice - totalPaid);
+        const totalDue = computeTotalDue(student.agreed_fee, coursePrice, student.discount);
+        const totalDebt = Math.max(0, totalDue - totalPaid);
 
         // Find last payment date - use payment_date if available, fallback to created_at
         const paidPayments = studentPayments.filter(p => p.status === 'paid');
@@ -175,7 +177,7 @@ export const useAllStudentsFinancial = () => {
       // Fetch all students
       const { data: students } = await supabase
         .from('students')
-        .select('id, user_id, course_id');
+        .select('id, user_id, course_id, agreed_fee, discount');
 
       if (!students || students.length === 0) return [];
 
@@ -211,7 +213,8 @@ export const useAllStudentsFinancial = () => {
           .reduce((sum, p) => sum + Number(p.amount), 0);
 
         const coursePrice = course ? Number(course.price) : 0;
-        const totalDebt = Math.max(0, coursePrice - totalPaid);
+        const totalDue = computeTotalDue(student.agreed_fee, coursePrice, student.discount);
+        const totalDebt = Math.max(0, totalDue - totalPaid);
 
         const paidPayments = studentPayments.filter(p => p.status === 'paid');
         let lastPaymentDate: string | null = null;
