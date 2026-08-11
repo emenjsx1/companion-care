@@ -12,6 +12,7 @@ import {
   X,
   Loader2,
   Wallet,
+  Receipt,
   Phone,
   UserCog,
   Image
@@ -36,6 +37,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { href: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/admin/students', icon: Users, label: 'Alunos' },
     { href: '/admin/financials', icon: Wallet, label: 'Financeiro' },
+    { href: '/admin/receivables', icon: Receipt, label: 'Conta-Corrente' },
     { href: '/admin/payments', icon: CreditCard, label: 'Pagamentos' },
     { href: '/admin/courses', icon: BookOpen, label: 'Cursos' },
     { href: '/admin/exams', icon: FileCheck, label: 'Exames' },
