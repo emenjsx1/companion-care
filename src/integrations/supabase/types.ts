@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
@@ -267,6 +267,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          branch: string | null
           created_at: string
           email: string
           full_name: string
@@ -277,6 +278,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          branch?: string | null
           created_at?: string
           email: string
           full_name: string
@@ -287,6 +289,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          branch?: string | null
           created_at?: string
           email?: string
           full_name?: string
@@ -355,6 +358,7 @@ export type Database = {
         Row: {
           address: string | null
           birth_date: string | null
+          branch: string | null
           city: string | null
           course_id: string | null
           created_at: string
@@ -369,6 +373,7 @@ export type Database = {
         Insert: {
           address?: string | null
           birth_date?: string | null
+          branch?: string | null
           city?: string | null
           course_id?: string | null
           created_at?: string
@@ -383,6 +388,7 @@ export type Database = {
         Update: {
           address?: string | null
           birth_date?: string | null
+          branch?: string | null
           city?: string | null
           course_id?: string | null
           created_at?: string
@@ -513,7 +519,6 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
-      trigger_daily_report: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "instructor" | "student"
