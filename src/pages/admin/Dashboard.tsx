@@ -14,13 +14,16 @@ import { usePayments } from '@/hooks/usePayments';
 
 const Dashboard = () => {
   const [dateRange, setDateRange] = useState<DateRange>(getDefaultDateRange());
-  const { data: dashboardStats, isLoading: statsLoading } = useDashboardStats();
+  const { data: dashboardStats, isLoading: statsLoading } = useDashboardStats({
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate,
+  });
   const { data: chartData, isLoading: chartLoading } = useMonthlyChartData();
   const { data: alerts, isLoading: alertsLoading } = useRecentAlerts();
   const { data: exams, isLoading: examsLoading } = useExams();
   const { data: payments } = usePayments({
-    startDate: dateRange.startDate.toISOString().split('T')[0],
-    endDate: dateRange.endDate.toISOString().split('T')[0],
+    startDate: toDayString(dateRange.startDate),
+    endDate: toDayString(dateRange.endDate),
   });
 
   const handleExportPDF = () => {
@@ -34,16 +37,16 @@ const Dashboard = () => {
       title: 'Alunos Activos',
       value: dashboardStats?.totalActiveStudents || 0,
       icon: Users,
-      change: `+${dashboardStats?.studentsThisMonth || 0} este mês`,
+      change: `+${dashboardStats?.studentsThisMonth || 0} · ${dateRange.label.toLowerCase()}`,
       changeType: 'positive' as const,
       color: 'text-primary',
       bg: 'bg-primary/10',
     },
     {
-      title: 'Receita Mensal',
+      title: 'Receita do Período',
       value: formatCurrency(dashboardStats?.monthlyRevenue || 0),
       icon: CreditCard,
-      change: 'Este mês',
+      change: dateRange.label,
       changeType: 'neutral' as const,
       color: 'text-success',
       bg: 'bg-success/10',
