@@ -44,11 +44,19 @@ export const usePayments = (filters?: { startDate?: string; endDate?: string; st
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (filters?.startDate) {
-        query = query.gte('created_at', filters.startDate);
-      }
-      if (filters?.endDate) {
-        query = query.lte('created_at', filters.endDate);
+      // Filter on the effective date of the payment (payment_date when set,
+      // otherwise created_at). Dates are inclusive on both ends.
+      const start = filters?.startDate;
+      const end = filters?.endDate;
+      if (start || end) {
+        const startTs = start ? `${start}T00:00:00` : '1900-01-01T00:00:00';
+        const endTs = end ? `${end}T23:59:59.999` : '2999-12-31T23:59:59';
+        const startDay = start || '1900-01-01';
+        const endDay = end || '2999-12-31';
+        query = query.or(
+          `and(payment_date.gte.${startDay},payment_date.lte.${endDay}),` +
+          `and(payment_date.is.null,created_at.gte.${startTs},created_at.lte.${endTs})`
+        );
       }
       if (filters?.studentId) {
         query = query.eq('student_id', filters.studentId);
