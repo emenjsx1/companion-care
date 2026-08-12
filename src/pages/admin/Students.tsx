@@ -68,12 +68,10 @@ const Students = () => {
   // Form without password - CRM Pure model
   const [formData, setFormData] = useState({
     full_name: '',
-    email: '',
     phone: '',
     birth_date: '',
     course_id: '',
     address: '',
-    city: '',
     document_number: '',
     enrollment_date: today(),
   });
@@ -85,7 +83,6 @@ const Students = () => {
     birth_date: '',
     course_id: '',
     address: '',
-    city: '',
     document_number: '',
     license_number: '',
     status: '',
@@ -110,9 +107,9 @@ const Students = () => {
 
     // Prevent duplicated students before submitting
     const duplicate = await findDuplicateStudent({
-      email: formData.email,
       phone: formData.phone || undefined,
       document_number: formData.document_number || undefined,
+      full_name: formData.full_name || undefined,
     });
     if (duplicate) {
       toast.error(duplicate, { description: 'Registo cancelado para evitar duplicados.' });
@@ -121,12 +118,10 @@ const Students = () => {
 
     await createStudent.mutateAsync({
       full_name: formData.full_name,
-      email: formData.email,
       phone: formData.phone || undefined,
       course_id: formData.course_id || undefined,
       birth_date: formData.birth_date || undefined,
       address: formData.address || undefined,
-      city: formData.city || undefined,
       document_number: formData.document_number || undefined,
       enrollment_date: formData.enrollment_date || undefined,
     });
@@ -134,12 +129,10 @@ const Students = () => {
     setIsDialogOpen(false);
     setFormData({
       full_name: '',
-      email: '',
       phone: '',
       birth_date: '',
       course_id: '',
       address: '',
-      city: '',
       document_number: '',
       enrollment_date: today(),
     });
@@ -162,7 +155,6 @@ const Students = () => {
       birth_date: student.birth_date || '',
       course_id: student.course_id || '',
       address: student.address || '',
-      city: student.city || '',
       document_number: student.document_number || '',
       license_number: student.license_number || '',
       status: student.status,
@@ -180,7 +172,6 @@ const Students = () => {
       course_id: editFormData.course_id || null,
       birth_date: editFormData.birth_date || null,
       address: editFormData.address || null,
-      city: editFormData.city || null,
       document_number: editFormData.document_number || null,
       license_number: editFormData.license_number || null,
       status: editFormData.status,
@@ -276,28 +267,15 @@ const Students = () => {
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="full_name">Nome Completo *</Label>
-                      <Input 
-                        id="full_name" 
-                        placeholder="Nome do aluno" 
-                        value={formData.full_name}
-                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                        required 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        placeholder="email@exemplo.com" 
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required 
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="full_name">Nome Completo *</Label>
+                    <Input
+                      id="full_name"
+                      placeholder="Nome do aluno"
+                      value={formData.full_name}
+                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                      required
+                    />
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -349,25 +327,14 @@ const Students = () => {
                       </Select>
                     </div>
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="address">Morada</Label>
-                      <Input 
-                        id="address" 
-                        placeholder="Rua, número" 
-                        value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="city">Cidade</Label>
-                      <Input 
-                        id="city" 
-                        placeholder="Quelimane" 
-                        value={formData.city}
-                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Morada (distrito)</Label>
+                    <Input
+                      id="address"
+                      placeholder="Distrito onde o aluno vive"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    />
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -795,23 +762,14 @@ const Students = () => {
                   </Select>
                 </div>
               </div>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit_address">Morada</Label>
-                  <Input 
-                    id="edit_address" 
-                    value={editFormData.address}
-                    onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit_city">Cidade</Label>
-                  <Input 
-                    id="edit_city" 
-                    value={editFormData.city}
-                    onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_address">Morada (distrito)</Label>
+                <Input
+                  id="edit_address"
+                  placeholder="Distrito onde o aluno vive"
+                  value={editFormData.address}
+                  onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit_status">Estado</Label>
