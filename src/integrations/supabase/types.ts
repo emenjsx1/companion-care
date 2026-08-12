@@ -124,6 +124,39 @@ export type Database = {
           },
         ]
       }
+      expenses: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          expense_date: string
+          id: string
+          notes: string | null
+          reason: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          reason: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          reason?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gallery_images: {
         Row: {
           alt_text: string | null
@@ -269,7 +302,7 @@ export type Database = {
           avatar_url: string | null
           branch: string | null
           created_at: string
-          email: string
+          email: string | null
           full_name: string
           id: string
           phone: string | null
@@ -280,7 +313,7 @@ export type Database = {
           avatar_url?: string | null
           branch?: string | null
           created_at?: string
-          email: string
+          email?: string | null
           full_name: string
           id?: string
           phone?: string | null
@@ -291,7 +324,7 @@ export type Database = {
           avatar_url?: string | null
           branch?: string | null
           created_at?: string
-          email?: string
+          email?: string | null
           full_name?: string
           id?: string
           phone?: string | null
@@ -542,6 +575,7 @@ export type Database = {
         | "A2"
         | "C1"
         | "CE"
+        | "G"
       exam_status: "scheduled" | "passed" | "failed" | "cancelled"
       payment_status: "pending" | "paid" | "cancelled" | "refunded"
     }
@@ -672,7 +706,19 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "instructor", "student"],
-      course_category: ["A", "B", "C", "D", "E", "ACC", "A1", "A2", "C1", "CE"],
+      course_category: [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "ACC",
+        "A1",
+        "A2",
+        "C1",
+        "CE",
+        "G",
+      ],
       exam_status: ["scheduled", "passed", "failed", "cancelled"],
       payment_status: ["pending", "paid", "cancelled", "refunded"],
     },
