@@ -48,7 +48,7 @@ export interface StudentHistory {
 
 // CRM Pure model - no password required
 export interface StudentInsert {
-  email: string;
+  email?: string;
   full_name: string;
   phone?: string;
   course_id?: string;
@@ -61,7 +61,7 @@ export interface StudentInsert {
 
 // Checks whether a student already exists (email, BI/document or phone)
 export const findDuplicateStudent = async (student: {
-  email: string;
+  email?: string;
   phone?: string;
   document_number?: string;
   full_name?: string;
@@ -206,7 +206,7 @@ export const useCreateStudent = () => {
       const { error: profileError } = await supabase.from('profiles').insert({
         user_id: userId,
         full_name: student.full_name,
-        email: student.email,
+        email: student.email || null,
         phone: student.phone || null,
       });
 

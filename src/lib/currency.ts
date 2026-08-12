@@ -27,15 +27,15 @@ export const PAYMENT_METHODS = [
 
 export type PaymentMethod = typeof PAYMENT_METHODS[number]['value'];
 
-// Payment types for installments
+// Payment types — os pagamentos são feitos em duas prestações,
+// excepto quando o aluno paga o valor total de uma só vez.
 export const PAYMENT_TYPES = [
-  { value: 'integral', label: 'Pagamento Integral' },
   { value: 'prestacao_1', label: '1ª Prestação' },
   { value: 'prestacao_2', label: '2ª Prestação' },
-  { value: 'prestacao_3', label: '3ª Prestação' },
-  { value: 'prestacao_4', label: '4ª Prestação' },
-  { value: 'final', label: 'Pagamento Final' },
-  { value: 'outro', label: 'Outro' },
+  { value: 'prestacao_unica', label: '1ª e única prestação' },
 ] as const;
+
+// Taxa de inscrição (fixa)
+export const ENROLLMENT_FEE = 300;
 
 export type PaymentType = typeof PAYMENT_TYPES[number]['value'];
